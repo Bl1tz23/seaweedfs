@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/chrislusf/seaweedfs/weed/filer"
-	"github.com/pquerna/cachecontrol/cacheobject"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +12,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/chrislusf/seaweedfs/weed/filer"
+	"github.com/pquerna/cachecontrol/cacheobject"
 
 	"github.com/chrislusf/seaweedfs/weed/s3api/s3err"
 
@@ -430,8 +431,12 @@ func getBucketAndObject(r *http.Request) (bucket, object string) {
 }
 
 func filerErrorToS3Error(errString string) s3err.ErrorCode {
-	if strings.HasPrefix(errString, "existing ") && strings.HasSuffix(errString, "is a directory") {
+	switch {
+	case strings.HasPrefix(errString, "existing ") && strings.HasSuffix(errString, "is a directory"):
 		return s3err.ErrExistingObjectIsDirectory
+	case strings.HasSuffix(errString, "is a file"):
+		return s3err.ErrExistingObjectIsFile
+	default:
+		return s3err.ErrInternalError
 	}
-	return s3err.ErrInternalError
 }

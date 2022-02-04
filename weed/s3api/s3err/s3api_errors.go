@@ -98,6 +98,7 @@ const (
 	ErrPreconditionFailed
 
 	ErrExistingObjectIsDirectory
+	ErrExistingObjectIsFile
 )
 
 // error code to APIError structure, these fields carry respective
@@ -363,6 +364,11 @@ var errorCodeResponse = map[ErrorCode]APIError{
 	ErrExistingObjectIsDirectory: {
 		Code:           "ExistingObjectIsDirectory",
 		Description:    "Existing Object is a directory.",
+		HTTPStatusCode: http.StatusConflict,
+	},
+	ErrExistingObjectIsFile: {
+		Code:           "ExistingObjectIsFile",
+		Description:    "Existing Object is a file.",
 		HTTPStatusCode: http.StatusConflict,
 	},
 }
