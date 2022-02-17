@@ -62,7 +62,11 @@ func (fs *FilerServer) GetOrHeadHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// set etag
+	if r.URL.Query().Has("metadata") {
+		writeJsonQuiet(w, r, http.StatusOK, entry)
+		return
+	}
+
 	etag := filer.ETagEntry(entry)
 	if ifm := r.Header.Get("If-Match"); ifm != "" && (ifm != "\""+etag+"\"" && ifm != etag){
 		w.WriteHeader(http.StatusPreconditionFailed)
