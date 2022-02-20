@@ -1,9 +1,17 @@
+FROM golang:1.16.14-alpine3.15 as builder
+
+ADD . /seaweed
+
+WORKDIR /seaweed/weed 
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o weed
+
 FROM alpine AS final
 LABEL author="Chris Lu"
-COPY  ./weed /usr/bin/
+COPY --from=builder /seaweed/weed/weed /usr/bin/weed
 RUN mkdir -p /etc/seaweedfs
-COPY ./filer.toml /etc/seaweedfs/filer.toml
-COPY ./entrypoint.sh /entrypoint.sh
+COPY --from=builder /seaweed/docker/filer.toml /etc/seaweedfs/filer.toml
+COPY --from=builder /seaweed/docker/entrypoint.sh /entrypoint.sh
 RUN apk add fuse # for weed mount
 
 # volume server grpc port
@@ -26,6 +34,7 @@ EXPOSE 7333
 RUN mkdir -p /data/filerldb2
 
 VOLUME /data
+WORKDIR /data
 
 RUN chmod +x /entrypoint.sh
 
